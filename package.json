@@ -1,10 +1,10 @@
 {
   "name": "merapi-proxy",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Client for merapi service",
   "main": "index.js",
   "scripts": {
-      "test": "./node_modules/.bin/_mocha"
+    "test": "./node_modules/.bin/_mocha"
   },
   "repository": "https://github.com/kata-ai/merapi-proxy.git",
   "author": "Ahmad Rizqi Meydiarso",
@@ -16,6 +16,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "mocha": "^3.2.0",
+    "request-promise": "^4.2.0",
     "sleep-promise": "^2.0.0",
     "sync-request": "^4.0.1",
     "to-camel-case": "^1.0.0",
