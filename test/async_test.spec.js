@@ -6,6 +6,7 @@ const asyncProxy = require("../async");
 describe("Proxy Async Test", function() {
     
     let container, proxy;
+    let lazyContainer, lazyProxy;
 
     before(coroutine(function* () {
         container = merapi({
@@ -39,6 +40,36 @@ describe("Proxy Async Test", function() {
         }, true);
 
         yield container.start();
+
+        lazyContainer = merapi({
+            basepath: __dirname,
+            config: {
+                name: "testLazy",
+                plugins: ["service"],
+                version: "1.0.0",
+                main: "lazyMainCom",
+                components: {},
+                service: {
+                    "port": "5010",
+                    "api.v1": {
+                        list: "lazyMainCom.list",
+                        get: "lazyMainCom.get"
+                    }
+                }
+            }
+        });
+
+        lazyContainer.register("lazyMainCom", {
+            list() {
+                return [1,2];
+            },
+            get(x) {
+                return x;
+            },
+            start() {
+
+            }
+        }, true)
     }));
 
     it("should create proxy", coroutine(function*() {
@@ -59,5 +90,23 @@ describe("Proxy Async Test", function() {
         let res = yield proxy.get(10);
         assert.deepEqual(res, 10);
     }));
+
+    it("should create lazy proxy when endpoint not ready", coroutine(function*() {
+        lazyProxy = yield asyncProxy("http://localhost:5010", { lazy: true, retryDelay: 1000 }, console);
+        assert.equal(lazyProxy.isReady(), false);
+    }));
+
+    it("should able to call proxy when endpoint ready", coroutine(function*() {
+        let sleep = (ms) => {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        };
+        yield lazyContainer.start();
+        yield sleep(1500);
+        assert.equal(lazyProxy.isReady(), true);
+        let res = yield lazyProxy.get(10);
+        assert.deepEqual(res, 10);
+    }));
+
+
 
 });
