@@ -4,9 +4,11 @@ const {async:coroutine} = require("merapi");
 const asyncProxy = require("../async");
 
 describe("Proxy Async Test", function() {
+
+    this.timeout(5000);
     
     let container, proxy;
-    let lazyContainer, lazyProxy;
+    let lazyContainer, lazyProxy, unresolvedProxy;
 
     before(coroutine(function* () {
         container = merapi({
@@ -101,12 +103,19 @@ describe("Proxy Async Test", function() {
             return new Promise(resolve => setTimeout(resolve, ms));
         };
         yield lazyContainer.start();
-        yield sleep(1500);
+        yield sleep(2500);
         assert.equal(lazyProxy.isReady(), true);
         let res = yield lazyProxy.get(10);
         assert.deepEqual(res, 10);
     }));
 
+    it("should create proxy when version is not defined", coroutine(function* () {
+        unresolvedProxy = yield asyncProxy("http://localhost:5010", {version: "5.0.0"}, console);
+        assert.notEqual(unresolvedProxy, null);
+    }));
 
+    it("should not have any function", coroutine(function*() {
+        assert.deepEqual(Object.keys(unresolvedProxy), []);
+    }));
 
 });
