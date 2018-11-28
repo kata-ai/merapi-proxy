@@ -4,7 +4,7 @@ const {async:coroutine} = require("merapi");
 const asyncProxy = require("../async");
 
 describe("Proxy Async Test", function() {
-    
+
     let container, proxy;
     let lazyContainer, lazyProxy;
 
@@ -101,12 +101,9 @@ describe("Proxy Async Test", function() {
             return new Promise(resolve => setTimeout(resolve, ms));
         };
         yield lazyContainer.start();
-        yield sleep(1500);
+        yield sleep(1600);
         assert.equal(lazyProxy.isReady(), true);
         let res = yield lazyProxy.get(10);
         assert.deepEqual(res, 10);
     }));
-
-
-
 });
