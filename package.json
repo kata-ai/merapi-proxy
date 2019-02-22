@@ -1,6 +1,6 @@
 {
   "name": "merapi-proxy",
-  "version": "0.1.8",
+  "version": "1.0.0",
   "description": "Client for merapi service",
   "main": "index.js",
   "scripts": {
@@ -10,13 +10,12 @@
   "author": "Ahmad Rizqi Meydiarso",
   "license": "MIT",
   "devDependencies": {
-    "merapi": "^0.15.2",
-    "merapi-plugin-service": "^0.3.0",
-    "mocha": "^5.2.0"
+    "merapi": "^0.19.3"
   },
   "dependencies": {
     "async": "^2.6.0",
     "bluebird": "^3.5.0",
+    "mocha": "^5.2.0",
     "request": "^2.81.0",
     "request-promise": "^4.2.0",
     "sleep-promise": "^2.0.0",
