@@ -9,7 +9,7 @@ function lazyLoad(uri, opt, logger) {
     let info;
     let infoUri =  uri.protocol + "//" + uri.host + "/info";
     let status = () => {
-        return info !== undefined;
+        return (info !== undefined && typeof info === 'object');
     };
 
     let ready = false;
