@@ -24,7 +24,8 @@ describe("Proxy Async Test", function() {
                     "api.v1": {
                         list: "mainCom.list",
                         get: "mainCom.get",
-                        getError: "mainCom.getError"
+                        getError: "mainCom.getError",
+                        getUnexpectedError: "mainCom.getUnexpectedError",
                     }
                 }
             }
@@ -36,6 +37,10 @@ describe("Proxy Async Test", function() {
             },
             getError() {
                 throw new Error("error occurred!");
+            },
+            getUnexpectedError() {
+                const obj = {};
+                return obj.undefinedAPI();
             },
             get(x) {
                 return x;
@@ -84,7 +89,7 @@ describe("Proxy Async Test", function() {
     }));
 
     it("should have all functions", coroutine(function*() {
-        assert.deepStrictEqual(Object.keys(proxy), ["list", "get", "getError"]);
+        assert.deepStrictEqual(Object.keys(proxy), ["list", "get", "getError", "getUnexpectedError"]);
     }));
 
     it("should be able to get result", coroutine(function*() {
@@ -114,13 +119,16 @@ describe("Proxy Async Test", function() {
     }));
 
     it("should be able to catch error if exception happens", coroutine(function*() {
-        // TODO: add tests
-        // try {
-        //     const ret = yield proxy.getError();
-        //     // it should expect to produce exception
-        // } catch (e) {
-        //     console.log(`>>>>> Excpetion is ${e}`)
-        //     assert.notStrictEqual(e, null);
-        // }
+        const errMessage = `Error at proxy call: error occurred!, request params: {"uri":"http://localhost:5005/api/v1/get_error","method":"POST","headers":{"Authorization":""},"body":{"params":[],"source":"merapi-proxy"},"json":true,"timeout":5000,"socketTimeout":5000}`
+        yield assert.rejects(coroutine(function*(){
+            yield proxy.getError();
+        }), new Error(errMessage));
     }))
+
+    it("should be able to catch obscure error", coroutine(function*() {
+        const errMessage = `Error at proxy call: obj.undefinedAPI is not a function, request params: {"uri":"http://localhost:5005/api/v1/get_unexpected_error","method":"POST","headers":{"Authorization":""},"body":{"params":[],"source":"merapi-proxy"},"json":true,"timeout":5000,"socketTimeout":5000}`
+        yield assert.rejects(coroutine(function*(){
+            yield proxy.getUnexpectedError();
+        }), new Error(errMessage))
+    }));
 });
