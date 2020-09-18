@@ -119,14 +119,14 @@ describe("Proxy Async Test", function() {
     }));
 
     it("should be able to catch error if exception happens", coroutine(function*() {
-        const errMessage = `Error at proxy call: error occurred!, request params: {"uri":"http://localhost:5005/api/v1/get_error","method":"POST","headers":{"Authorization":""},"body":{"params":[],"source":"merapi-proxy"},"json":true,"timeout":5000,"socketTimeout":5000}`
+        const errMessage = `Error at proxy call error occurred!, with result: {"status":"error","error":"error occurred!"}, request params: {"uri":"http://localhost:5005/api/v1/get_error","method":"POST","headers":{"Authorization":""},"body":{"params":[],"source":"merapi-proxy"},"json":true,"timeout":5000,"socketTimeout":5000}`
         yield assert.rejects(coroutine(function*(){
             yield proxy.getError();
         }), new Error(errMessage));
     }))
 
     it("should be able to catch obscure error", coroutine(function*() {
-        const errMessage = `Error at proxy call: obj.undefinedAPI is not a function, request params: {"uri":"http://localhost:5005/api/v1/get_unexpected_error","method":"POST","headers":{"Authorization":""},"body":{"params":[],"source":"merapi-proxy"},"json":true,"timeout":5000,"socketTimeout":5000}`
+        const errMessage = `Error at proxy call obj.undefinedAPI is not a function, with result: {"status":"error","error":"obj.undefinedAPI is not a function"}, request params: {"uri":"http://localhost:5005/api/v1/get_unexpected_error","method":"POST","headers":{"Authorization":""},"body":{"params":[],"source":"merapi-proxy"},"json":true,"timeout":5000,"socketTimeout":5000}`
         yield assert.rejects(coroutine(function*(){
             yield proxy.getUnexpectedError();
         }), new Error(errMessage))
