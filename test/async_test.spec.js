@@ -1,3 +1,5 @@
+"use strict";
+
 const assert = require("assert");
 const merapi = require("merapi");
 const {async:coroutine} = require("merapi");
@@ -21,7 +23,9 @@ describe("Proxy Async Test", function() {
                     "port": "5005",
                     "api.v1": {
                         list: "mainCom.list",
-                        get: "mainCom.get"
+                        get: "mainCom.get",
+                        getError: "mainCom.getError",
+                        getUnexpectedError: "mainCom.getUnexpectedError",
                     }
                 }
             }
@@ -30,6 +34,13 @@ describe("Proxy Async Test", function() {
         container.register("mainCom", {
             list() {
                 return [1,2];
+            },
+            getError() {
+                throw new Error("error occurred!");
+            },
+            getUnexpectedError() {
+                const obj = {};
+                return obj.undefinedAPI();
             },
             get(x) {
                 return x;
@@ -74,26 +85,26 @@ describe("Proxy Async Test", function() {
 
     it("should create proxy", coroutine(function*() {
         proxy = yield asyncProxy("http://localhost:5005");
-        assert.notEqual(proxy, null);
+        assert.notStrictEqual(proxy, null);
     }));
 
     it("should have all functions", coroutine(function*() {
-        assert.deepEqual(Object.keys(proxy), ["list", "get"]);
+        assert.deepStrictEqual(Object.keys(proxy), ["list", "get", "getError", "getUnexpectedError"]);
     }));
 
     it("should be able to get result", coroutine(function*() {
         let res = yield proxy.list();
-        assert.deepEqual(res, [1,2]);
+        assert.deepStrictEqual(res, [1,2]);
     }));
 
     it("should be able to get result with arguments", coroutine(function*() {
         let res = yield proxy.get(10);
-        assert.deepEqual(res, 10);
+        assert.deepStrictEqual(res, 10);
     }));
 
     it("should create lazy proxy when endpoint not ready", coroutine(function*() {
         lazyProxy = yield asyncProxy("http://localhost:5010", { lazy: true, retryDelay: 1000 }, console);
-        assert.equal(lazyProxy.isReady(), false);
+        assert.strictEqual(lazyProxy.isReady(), false);
     }));
 
     it("should able to call proxy when endpoint ready", coroutine(function*() {
@@ -102,8 +113,22 @@ describe("Proxy Async Test", function() {
         };
         yield lazyContainer.start();
         yield sleep(1600);
-        assert.equal(lazyProxy.isReady(), true);
+        assert.strictEqual(lazyProxy.isReady(), true);
         let res = yield lazyProxy.get(10);
-        assert.deepEqual(res, 10);
+        assert.deepStrictEqual(res, 10);
+    }));
+
+    it("should be able to catch error if exception happens", coroutine(function*() {
+        const errMessage = `Error at proxy call error occurred!, with result: {"status":"error","error":"error occurred!"}, request params: {"uri":"http://localhost:5005/api/v1/get_error","method":"POST","headers":{"Authorization":""},"body":{"params":[],"source":"merapi-proxy"},"json":true,"timeout":5000,"socketTimeout":5000}`
+        yield assert.rejects(coroutine(function*(){
+            yield proxy.getError();
+        }), new Error(errMessage));
+    }))
+
+    it("should be able to catch obscure error", coroutine(function*() {
+        const errMessage = `Error at proxy call obj.undefinedAPI is not a function, with result: {"status":"error","error":"obj.undefinedAPI is not a function"}, request params: {"uri":"http://localhost:5005/api/v1/get_unexpected_error","method":"POST","headers":{"Authorization":""},"body":{"params":[],"source":"merapi-proxy"},"json":true,"timeout":5000,"socketTimeout":5000}`
+        yield assert.rejects(coroutine(function*(){
+            yield proxy.getUnexpectedError();
+        }), new Error(errMessage))
     }));
 });

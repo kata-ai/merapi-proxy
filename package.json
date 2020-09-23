@@ -1,6 +1,6 @@
 {
   "name": "merapi-proxy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Client for merapi service",
   "main": "index.js",
   "scripts": {
