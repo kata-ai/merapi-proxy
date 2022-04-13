@@ -13,7 +13,7 @@
     "merapi": "^0.19.3"
   },
   "dependencies": {
-    "async": "^2.6.0",
+    "async": "^3.2.2",
     "bluebird": "^3.5.0",
     "merapi-plugin-service": "^0.3.0",
     "mocha": "^5.2.0",
